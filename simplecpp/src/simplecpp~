@@ -35,5 +35,4 @@
 using namespace simplecpp;
 
 using simplecpp::wait;
-
 #endif

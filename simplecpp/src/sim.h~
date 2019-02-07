@@ -19,7 +19,7 @@ namespace simplecpp{
       pq.push(make_pair(e,time+dT));
     }
     static double getTime(){return time;}
-    static void processAll(double tmax=HUGE_VAL){
+    static void processAll(double tmax=1000){
       while(!pq.empty() && time < tmax){
 	ETpair ETp = pq.top();
 	time = ETp.second;
