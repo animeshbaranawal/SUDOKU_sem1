@@ -1,0 +1,15 @@
+Algorithm:
+-> have a separate condition class which will check a given condition
+   on a range of indices
+-> condition can be of many types.. use abstraction here
+
+GUI:
+-> one main grid
+-> better to first create a jigsaw ui.. 
+   the standard case is the special case of jigsaw ui
+   Think of a procedure to create a jigsaw tiling for a region
+-> take care of abstraction
+
+Algorithm for generating jigsaw puzzles:
+-> create a hamiltonian cycle for subset of the graph
+-> travelling across the cycle, exchange cells..

@@ -286,14 +286,10 @@ for(int j=0;j<9;j++)
 if(row/3==0){bigrow=0;}if(row/3==1){bigrow=1;}if(row/3==2){bigrow=2;}//assigning big square family
 if(column/3==0){bigcolumn=0;}if(column/3==1){bigcolumn=1;}if(column/3==2){bigcolumn=2;}
 
-int br=bigrow,bc=bigcolumn;
-for(int i=0;i<3;i++)
-	{for(int j=0;j<3;j++)
-		{if(board[br*3+i][bc*3+j]==p)//checking big squarewise
-			{return false;}
-			}
-	}
-return true;}
+int br=bigrow,bc=bigcolumn; for(int i=0;i<3;i++)     {for(int
+j=0;j<3;j++)         {if(board[br*3+i][bc*3+j]==p)//checking big
+squarewise             {return false;}             }     } return
+true;}
 
 int emptyfill(int board[9][9],Emptycell empty[])//function to fill emptycell addresses
 {int count=0;
