@@ -1,0 +1,8 @@
+﻿  Rcc'ing simplecpp_qt.qrc...
+  Moc'ing canvas.h...
+   RCC: Warning: No resources in 'C:\Users\animesh\Desktop\Sudoku\SUDOKU_sem1\simplecpp_qt\simplecpp_qt\simplecpp_qt\simplecpp_qt.qrc'.
+  canvas.cpp
+  main.cpp
+  qrc_simplecpp_qt.cpp
+  moc_canvas.cpp
+  simplecpp_qt.vcxproj -> C:\Users\animesh\Desktop\Sudoku\SUDOKU_sem1\simplecpp_qt\simplecpp_qt\x64\Release\simplecpp_qt.exe
