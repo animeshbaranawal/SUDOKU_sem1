@@ -38,26 +38,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="canvas.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
     <QtRcc Include="simplecpp_qt.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="QTCanvas_class.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_QTCanvas_class.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="common_def.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="canvas.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

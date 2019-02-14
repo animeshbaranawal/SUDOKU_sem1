@@ -2,18 +2,10 @@
 #define _CANVAS_INCLUDED
 
 #include <string>
-
-#include "qpoint.h"
-#include "qmainwindow.h"
-#include "qpen.h"
-#include "qpixmap.h"
-
 #include "common_def.h"
 
-namespace Ui
-{
-	class QTCanvas_class;
-}
+#include "qpoint.h"
+#include "qpen.h"
 
 namespace simplecpp{
   
@@ -32,62 +24,45 @@ namespace simplecpp{
 	//!< Abort the application
 	void abort();
 
-	class QTCanvas : public QMainWindow
-	{
-		Q_OBJECT
-	public:
-		/*! \brief Creates a graphic window
-		* @param window_title - title of the graphics window
-		* @param w - width of the canvas
-		* @param h - height of the canvas
-		* @return int - return status of the API.. success if 0 else failed.
-		*/
-		static int initCanvas(const char window_title[] = "Simplecpp QT Canvas", int w = 500, int h = 500);
-		
-		/*! \brief closes the graphic window
-		* @return int - return status of the API.. success if 0 else failed.
-		*/
-		static int closeCanvas();
+	/*! \brief Creates a graphic window
+	* @param window_title - title of the graphics window
+	* @param w - width of the canvas
+	* @param h - height of the canvas
+	* @return int - return status of the API.. success if 0 else failed.
+	*/
+	int initCanvas(const char window_title[] = "Simplecpp QT Canvas", int w = 500, int h = 500);
 
-		/*! \brief Width of the canvas
-		* @return int - width of the canvas
-		*/
-		static int canvas_width();
+	/*! \brief closes the graphic window
+	* @return int - return status of the API.. success if 0 else failed.
+	*/
+	int closeCanvas();
 
-		/*! \brief Height of the canvas
-		* @return int - height of the canvas
-		*/
-		static int canvas_height();
+	/*! \brief Width of the canvas
+	* @return int - width of the canvas
+	*/
+	int canvas_width();
 
-		static void drawLine(QPointF start, QPointF end, Color line_color, unsigned int line_width = 0);
+	/*! \brief Height of the canvas
+	* @return int - height of the canvas
+	*/
+	int canvas_height();
 
-		static void drawPoint(QPointF point, Color point_color);
+	void drawLine(QPointF start, QPointF end, Color line_color, unsigned int line_width = 0);
 
-		static void drawCircle(QPointF centre, int radius, Color fill_color, bool fill = true, unsigned int line_width = 0, 
-			Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin);
+	void drawPoint(QPointF point, Color point_color);
 
-		/*static void drawEllipse(QPointF centre, int width, int height, Color fill_color, bool fill = true, unsigned int line_width = 1, 
-			Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin);
+	void drawCircle(QPointF centre, int radius, Color fill_color, bool fill = true, unsigned int line_width = 0,
+		Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin);
 
-		static void drawPolygon(QPointF *points, int npoints, Color fill_color, bool fill = true, unsigned int line_width = 0, 
-			Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin, Qt::FillRule fill_rule = Qt::WindingFill);
+	/*static void drawEllipse(QPointF centre, int width, int height, Color fill_color, bool fill = true, unsigned int line_width = 1,
+	Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin);
 
-		static void drawText(float x, float y, string text, Color clr);
+	static void drawPolygon(QPointF *points, int npoints, Color fill_color, bool fill = true, unsigned int line_width = 0,
+	Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin, Qt::FillRule fill_rule = Qt::WindingFill);
 
-		static void drawText(QPointF position, string message, Color clr);*/
-	
-	protected:
-		void paintEvent(QPaintEvent* event) override;
+	static void drawText(float x, float y, string text, Color clr);
 
-	private:
-		QTCanvas(QWidget* parent = Q_NULLPTR);
-		~QTCanvas();
-		
-		Ui::QTCanvas_class* canvasUI;
-		QPen canvasPen;
-		QFont canvasFont;
-		QPixmap* backendPixmap;
-	};
+	static void drawText(QPointF position, string message, Color clr);*/
 
 	/*
 	int textWidth(string text);

@@ -5,7 +5,9 @@
 #include <Windows.h>
 
 #include "canvas.h"
-#include "ui_QTCanvas_class.h"
+
+#include "qmainwindow.h"
+#include "qpixmap.h"
 #include "qpainter.h"
 #include "qfile.h"
 
@@ -44,11 +46,100 @@ std::multiset<Sprite *, LtSprite> spriteSet;
 
 namespace simplecpp{
 	
+	class QTCanvas : public QMainWindow
+	{
+	public:
+		QTCanvas(QWidget* parent = Q_NULLPTR);
+		~QTCanvas();
+
+		void setSize(int width, int height)
+		{
+			QRect geometry(cWidget->geometry());
+			geometry.setHeight(height);
+			geometry.setWidth(width);
+
+			cWidget->setGeometry(geometry);
+		}
+
+		QPen getPen() const { return canvasPen; }
+		
+		QFont getFont() const { return canvasFont; }
+		
+		QPixmap getCanvasPrint() const
+		{
+			QPixmap print(cWidget->size());
+			cWidget->render(&print, QPoint());
+			return print;
+		}
+
+		void imprint(const QPixmap& print) const
+		{
+			cWidget->backendPixmap = print;
+			cWidget->update();
+		}
+
+	protected:
+		class CanvasWidget : public QWidget
+		{
+			friend QTCanvas;
+		
+		public:
+			CanvasWidget(QWidget* parent = Q_NULLPTR) {};
+			~CanvasWidget() {};
+
+		protected:
+			void paintEvent(QPaintEvent* event) override
+			{
+				/// paint the widget
+				QPainter painter(this);
+				painter.drawPixmap(0, 0, backendPixmap);
+			}
+
+		private:
+			QPixmap backendPixmap;
+		};
+
+	private:
+		CanvasWidget* cWidget;
+
+		QPen canvasPen;
+		QFont canvasFont;
+	};
+
 	static QTCanvas* currentCanvas = Q_NULLPTR;
+
+	QTCanvas::QTCanvas(QWidget* parent)
+	{
+		/// initialise canvas UI
+		cWidget = new CanvasWidget(this);
+		cWidget->setGeometry(this->geometry());
+		cWidget->setEnabled(true);
+		cWidget->setMouseTracking(true);
+		cWidget->setStyleSheet("background-color:white;");
+		cWidget->show();
+
+		/// set canvas pen properties
+		canvasPen.setWidth(2);
+		canvasPen.setStyle(Qt::SolidLine);
+		canvasPen.setJoinStyle(Qt::MiterJoin);
+		canvasPen.setCapStyle(Qt::FlatCap);
+
+		/// set canvas font properties
+		canvasFont = QFont("Helvetica");
+		canvasFont.setBold(true);
+		canvasFont.setPointSize(24);
+
+		cWidget->setFont(canvasFont);
+	}
+
+	QTCanvas::~QTCanvas()
+	{
+		delete cWidget;
+	}
 
 	double randuv(double u, double v)
 	{
-		return u + (v-u) * rand()/(1.0 + RAND_MAX);
+		return u + (v - u) * rand() / (1.0 + RAND_MAX);
 	}
 
 	/*// void srand(unsigned int seed){
@@ -61,42 +152,7 @@ namespace simplecpp{
 		Sleep((int)(duration * 1000));
 	}
 
-	QTCanvas::QTCanvas(QWidget* parent)
-	{
-		canvasUI = new Ui::QTCanvas_class();
-		canvasUI->setupUi(this);
-
-		/// set canvas pen properties
-		canvasPen.setWidth(2);
-		canvasPen.setStyle(Qt::SolidLine);
-		canvasPen.setJoinStyle(Qt::MiterJoin);
-		canvasPen.setCapStyle(Qt::FlatCap);
-
-		/// set canvas font properties
-		canvasFont = QFont("Helvetica");
-		canvasFont.setBold(true);
-		canvasFont.setPointSize(24);
-	}
-
-	QTCanvas::~QTCanvas()
-	{
-		delete canvasUI;
-	}
-
-	void QTCanvas::paintEvent(QPaintEvent* event)
-	{
-		if (backendPixmap)
-		{
-			/// paint the widget
-			QPainter painter(this->canvasUI->centralWidget);
-			painter.drawPixmap(0, 0, *backendPixmap);
-		}
-		
-		delete backendPixmap; /// clear the pixmap
-		backendPixmap = Q_NULLPTR;
-	}
-
-	int QTCanvas::initCanvas(const char window_title[], int w, int h)
+	int initCanvas(const char window_title[], int w, int h)
 	{
 		if (currentCanvas) /// instance already present
 			return -1;
@@ -108,19 +164,13 @@ namespace simplecpp{
 			return 1;
 		}
 		
-		currentCanvas->setGeometry(QRect(0,0,w,h));
+		currentCanvas->setSize(w,h);
 		currentCanvas->setWindowTitle(QString::fromStdString(window_title));
-		currentCanvas->show();
-
-		currentCanvas->canvasUI->centralWidget->setFont(currentCanvas->canvasFont);
-		currentCanvas->canvasUI->centralWidget->setGeometry(currentCanvas->geometry());
-		
-		drawLine(QPointF(0, 0), QPointF(100, 100), 0, 30);
 
 		return 0;
 	}
 
-	int QTCanvas::closeCanvas()
+	int closeCanvas()
 	{
 		if (!currentCanvas) /// no instance present to close
 			return -1;
@@ -132,7 +182,7 @@ namespace simplecpp{
 		return 0;
 	}
 
-	int QTCanvas::canvas_width()
+	int canvas_width()
 	{
 		if (!currentCanvas) // no instance present
 			return -1;
@@ -140,7 +190,7 @@ namespace simplecpp{
 		return currentCanvas->width();
 	}
 
-	int QTCanvas::canvas_height()
+	int canvas_height()
 	{
 		if (!currentCanvas) // no instance present
 			return -1;
@@ -148,65 +198,61 @@ namespace simplecpp{
 		return currentCanvas->height();
 	}
 
-	void QTCanvas::drawLine(QPointF start, QPointF end, Color line_color, unsigned int line_width) 
+	void drawLine(QPointF start, QPointF end, Color line_color, unsigned int line_width) 
 	{
 		if (!currentCanvas) /// invalid current canvas
 			return;
 
 		/// create a copy of the canvas pen
-		QPen linePen(currentCanvas->canvasPen);
+		QPen linePen = currentCanvas->getPen();
 		linePen.setColor(QColor(line_color, line_color, line_color));
 		linePen.setWidth(line_width);
 
 		/// create a painter to draw the line
-		currentCanvas->backendPixmap = new QPixmap(currentCanvas->canvasUI->centralWidget->size());
-		currentCanvas->canvasUI->centralWidget->render(currentCanvas->backendPixmap, QPoint());
-		
-		QPainter canvasPainter(currentCanvas->backendPixmap);
+		QPixmap canvasPrint(currentCanvas->getCanvasPrint());
+		QPainter canvasPainter(&canvasPrint);
 		canvasPainter.setPen(linePen);
 		canvasPainter.drawLine(start, end);
-		
-		QFile file("screenshot.png");
-		file.open(QIODevice::WriteOnly);
-		currentCanvas->backendPixmap->save(&file, "PNG");
-
-		currentCanvas->update();
+		currentCanvas->imprint(canvasPrint);
 	}
 
-	void QTCanvas::drawPoint(QPointF point, Color point_color)
+	void drawPoint(QPointF point, Color point_color)
 	{
 		if (!currentCanvas) /// invalid current canvas
 			return;
 
 		/// create a copy of the canvas pen
-		QPen linePen(currentCanvas->canvasPen);
+		QPen linePen = currentCanvas->getPen();
 		linePen.setColor(QColor(point_color, point_color, point_color));
 
 		/// create a painter to draw the point
-		QPainter canvasPainter(currentCanvas);
+		QPixmap canvasPrint(currentCanvas->getCanvasPrint());
+		QPainter canvasPainter(&canvasPrint);
 		canvasPainter.setPen(linePen);
 		canvasPainter.drawPoint(point);
-		currentCanvas->repaint();
+		currentCanvas->imprint(canvasPrint);
 	}
 
-	void QTCanvas::drawCircle(QPointF centre, int radius, Color fill_color, bool fill, unsigned int line_width,
+	void drawCircle(QPointF centre, int radius, Color fill_color, bool fill, unsigned int line_width,
 		Qt::PenStyle line_style, Qt::PenCapStyle cap_style, Qt::PenJoinStyle join_style)
 	{
 		if (!currentCanvas) /// invalid current canvas
 			return;
 
 		/// create a copy of the canvas pen
-		QPen linePen(currentCanvas->canvasPen);
+		QPen linePen = currentCanvas->getPen();
 		linePen.setColor(QColor(fill_color, fill_color, fill_color));
 		linePen.setWidth(line_width);
 		linePen.setStyle(line_style);
 		linePen.setCapStyle(cap_style);
 		linePen.setJoinStyle(join_style);
 
-		QPainter canvasPainter(currentCanvas);
+		/// create a painter to draw the point
+		QPixmap canvasPrint(currentCanvas->getCanvasPrint());
+		QPainter canvasPainter(&canvasPrint);
 		canvasPainter.setPen(linePen);
 		canvasPainter.drawEllipse(centre, radius, radius);
-		currentCanvas->repaint();
+		currentCanvas->imprint(canvasPrint);
 	}
 /*
   int initCanvas(const char window_title[], int width, int height){
