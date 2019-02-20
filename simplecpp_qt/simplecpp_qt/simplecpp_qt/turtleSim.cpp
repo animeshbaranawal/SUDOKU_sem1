@@ -1,7 +1,8 @@
-#include <simplecpp>
+#include "turtle.h"
+#include "canvas.h"
 //#include <cstdlib>
 
-Turtle *_PsystemTurtle_;
+simplecpp::Turtle *_PsystemTurtle_;
 
 void check(const char* msg){
   if(!_PsystemTurtle_){

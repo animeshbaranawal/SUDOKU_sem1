@@ -2,14 +2,17 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include <set>
 #include <Windows.h>
 
 #include "canvas.h"
+#include "sprite.h"
 
 #include "qmainwindow.h"
 #include "qpixmap.h"
 #include "qpainter.h"
 #include "qfile.h"
+#include "qstring.h"
 
 using namespace std;
 
@@ -41,7 +44,6 @@ struct LtSprite
   }
 };
 
-std::multiset<Sprite *, LtSprite> spriteSet;
 */
 
 namespace simplecpp{
@@ -78,6 +80,13 @@ namespace simplecpp{
 			cWidget->update();
 		}
 
+		void clearCanvas() const
+		{
+			QPixmap print(cWidget->size());
+			print.fill(Qt::white);
+			imprint(print);
+		}
+
 	protected:
 		class CanvasWidget : public QWidget
 		{
@@ -106,7 +115,18 @@ namespace simplecpp{
 		QFont canvasFont;
 	};
 
-	static QTCanvas* currentCanvas = Q_NULLPTR;
+	QTCanvas* currentCanvas = Q_NULLPTR;
+	
+	struct LtSprite
+	{
+		bool operator()(const Sprite* s1, const Sprite* s2) const {
+			return s1->getZIndex() < s2->getZIndex();
+			//    return s1 < s2;
+		}
+	};
+
+	std::multiset<Sprite*, LtSprite> spriteSet;
+	bool globalRepaintFlag;
 
 	QTCanvas::QTCanvas(QWidget* parent)
 	{
@@ -166,6 +186,8 @@ namespace simplecpp{
 		
 		currentCanvas->setSize(w,h);
 		currentCanvas->setWindowTitle(QString::fromStdString(window_title));
+
+		globalRepaintFlag = true;
 
 		return 0;
 	}
@@ -236,7 +258,14 @@ namespace simplecpp{
 	void drawCircle(QPointF centre, int radius, Color fill_color, bool fill, unsigned int line_width,
 		Qt::PenStyle line_style, Qt::PenCapStyle cap_style, Qt::PenJoinStyle join_style)
 	{
-		if (!currentCanvas) /// invalid current canvas
+		drawEllipse(centre, 2 * radius, 2 * radius, fill_color, fill, line_width,
+			line_style, cap_style, join_style);
+	}
+
+	void drawEllipse(QPointF centre, int width, int height, Color fill_color, bool fill, unsigned int line_width,
+		Qt::PenStyle line_style, Qt::PenCapStyle cap_style, Qt::PenJoinStyle join_style)
+	{
+		if (!currentCanvas)
 			return;
 
 		/// create a copy of the canvas pen
@@ -247,13 +276,144 @@ namespace simplecpp{
 		linePen.setCapStyle(cap_style);
 		linePen.setJoinStyle(join_style);
 
+		QBrush paintBrush;
+		paintBrush.setStyle(Qt::SolidPattern);
+		paintBrush.setColor(QColor(fill_color, fill_color, fill_color));
+
 		/// create a painter to draw the point
 		QPixmap canvasPrint(currentCanvas->getCanvasPrint());
 		QPainter canvasPainter(&canvasPrint);
 		canvasPainter.setPen(linePen);
-		canvasPainter.drawEllipse(centre, radius, radius);
+		canvasPainter.setBrush(paintBrush);
+		canvasPainter.drawEllipse(centre, width/2, height/2);
 		currentCanvas->imprint(canvasPrint);
 	}
+
+	void drawPolygon(QPointF *points, int npoints, Color fill_color, bool fill, unsigned int line_width,
+		Qt::PenStyle line_style, Qt::PenCapStyle cap_style, Qt::PenJoinStyle join_style, Qt::FillRule fill_rule)
+	{
+		if (!currentCanvas)
+			return;
+
+		/// create a copy of the canvas pen
+		QPen linePen = currentCanvas->getPen();
+		linePen.setColor(QColor(fill_color, fill_color, fill_color));
+		linePen.setWidth(line_width);
+		linePen.setStyle(line_style);
+		linePen.setCapStyle(cap_style);
+		linePen.setJoinStyle(join_style);
+
+		QBrush paintBrush;
+		paintBrush.setStyle(fill ? Qt::SolidPattern : Qt::NoBrush);
+		paintBrush.setColor(QColor(fill_color, fill_color, fill_color));
+
+		/// create a painter to draw the point
+		QPixmap canvasPrint(currentCanvas->getCanvasPrint());
+		QPainter canvasPainter(&canvasPrint);
+		canvasPainter.setPen(linePen);
+		canvasPainter.setBrush(paintBrush);
+		canvasPainter.drawPolygon(points, npoints, fill_rule);
+		currentCanvas->imprint(canvasPrint);
+	}
+
+	void drawText(float x, float y, std::string text, Color clr)
+	{
+		if (!currentCanvas)
+			return;
+
+		/// create a copy of the canvas pen
+		QPen linePen = currentCanvas->getPen();
+		linePen.setColor(QColor(clr, clr, clr));
+		
+		QPixmap canvasPrint(currentCanvas->getCanvasPrint());
+		QPainter canvasPainter(&canvasPrint);
+		canvasPainter.setPen(linePen);
+		canvasPainter.setFont(currentCanvas->getFont());
+		canvasPainter.drawText(x, y, QString::fromStdString(text));
+		currentCanvas->imprint(canvasPrint);
+	}
+
+	void drawText(QPointF position, string message, Color clr)
+	{
+		drawText(position.x(), position.y(), message, clr);
+	}
+
+	int textWidth(std::string text)
+	{
+		if (!currentCanvas)
+			return -1;
+
+		QFontMetrics fm(currentCanvas->getFont());
+		return fm.width(QString::fromStdString(text));
+	}
+
+	int textWidth(char ch)
+	{
+		if (!currentCanvas)
+			return -1;
+
+		QFontMetrics fm(currentCanvas->getFont());
+		return fm.width(QChar(ch));
+	}
+
+	int textHeight()
+	{
+		if (!currentCanvas)
+			return -1;
+
+		return QFontMetrics(currentCanvas->getFont()).height();
+	}
+
+	int textDescent()
+	{
+		if (!currentCanvas)
+			return -1;
+
+		return QFontMetrics(currentCanvas->getFont()).descent();
+	}
+
+	void addSprite(Sprite *t) {
+		if (t) {
+			spriteSet.insert(t);
+		}
+	}
+
+	void removeSprite(Sprite *t) {
+		if (t) {
+			for (auto iter = spriteSet.begin(); iter != spriteSet.end(); iter++) {
+				if ((*iter) == t) { spriteSet.erase(iter); break; }
+			}
+		}
+
+		repaint();
+	}
+
+	void c_imprint(Sprite* s) {
+		s->paint();
+	}
+
+	void repaint() {
+		if (!currentCanvas)
+			return;
+
+		currentCanvas->clearCanvas();
+		if (globalRepaintFlag)
+		{
+			for (auto iter = spriteSet.begin(); iter != spriteSet.end(); iter++) {
+				(*iter)->paint();
+			}
+		}
+	}
+
+	void beginFrame() {
+		globalRepaintFlag = false;
+	}
+	
+	void endFrame() {
+		globalRepaintFlag = true;
+		repaint();
+	}
+
 /*
   int initCanvas(const char window_title[], int width, int height){
 

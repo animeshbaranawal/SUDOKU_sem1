@@ -8,7 +8,8 @@
 #include "qpen.h"
 
 namespace simplecpp{
-  
+	class Sprite;
+
 	/*! \brief Generates a random number between u and v
 	* @param u - lower bound 
 	* @param v - upper bound
@@ -54,22 +55,31 @@ namespace simplecpp{
 	void drawCircle(QPointF centre, int radius, Color fill_color, bool fill = true, unsigned int line_width = 0,
 		Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin);
 
-	/*static void drawEllipse(QPointF centre, int width, int height, Color fill_color, bool fill = true, unsigned int line_width = 1,
-	Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin);
+	void drawEllipse(QPointF centre, int width, int height, Color fill_color, bool fill = true, unsigned int line_width = 1,
+		Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin);
 
-	static void drawPolygon(QPointF *points, int npoints, Color fill_color, bool fill = true, unsigned int line_width = 0,
-	Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin, Qt::FillRule fill_rule = Qt::WindingFill);
+	void drawPolygon(QPointF *points, int npoints, Color fill_color, bool fill = true, unsigned int line_width = 0,
+		Qt::PenStyle line_style = Qt::SolidLine, Qt::PenCapStyle cap_style = Qt::FlatCap, Qt::PenJoinStyle join_style = Qt::MiterJoin, Qt::FillRule fill_rule = Qt::WindingFill);
 
-	static void drawText(float x, float y, string text, Color clr);
+	void drawText(float x, float y, std::string text, Color clr);
 
-	static void drawText(QPointF position, string message, Color clr);*/
+	void drawText(QPointF position, string message, Color clr);
 
-	/*
-	int textWidth(string text);
+	int textWidth(std::string text);
 	int textWidth(char op);
 	int textHeight();
 	int textDescent();
 
+	void addSprite(Sprite *t);  // adds *t into the list of active sprites
+								// does not repaint immediately?
+	void removeSprite(Sprite *t);
+
+	void c_imprint(Sprite* s);  // paints *s into the background
+	void repaint();  // paint the current screen into new buffer, then transfer.
+	void beginFrame();  // suspend painting.  set flag appropriately.
+	void endFrame();    // resume painting.  reset flag.
+
+	/*
 	void addSprite(Sprite *t);  // adds *t into the list of active sprites
 								// does not repaint immediately?
 	void removeSprite(Sprite *t);
@@ -82,21 +92,6 @@ namespace simplecpp{
 	// paints the line into the the background
 
 	/* draw... : draw ... onto the current buffer. 
-
-	void drawLine(QPointF start, QPointF end, Color line_color, unsigned int line_width=0);
-
-	void drawPoint(QPointF point, Color point_color);
-
-	void drawCircle(QPointF centre, int radius, Color fill_color, bool fill=true, unsigned int line_width=0, int line_style=LineSolid, int cap_style=CapButt, int join_style=JoinMiter, int function=GXcopy);
-
-	void drawEllipse(QPointF centre, int width, int height, Color fill_color, bool fill=true, unsigned int line_width=1, int line_style=LineSolid, int cap_style=CapButt, int join_style=JoinMiter, int function=GXcopy);
-
-	void drawPolygon(QPointF *points, int npoints, Color fill_color, bool fill=true, unsigned int line_width=0, int line_style=LineSolid, int cap_style=CapButt, int join_style=JoinMiter, int fill_rule=WindingRule, int function=GXcopy);
-
-	//  void drawText(XPoint position, const char *text, Color clr);
-	//  void drawText(Position position, string text, Color clr);
-	void drawText(float x, float y, string text, Color clr);
-	void drawText(QPointF position, string message, Color clr);
 
 	void c_imprint(Sprite* s);  // paints *s into the background
 	void repaint();  // paint the current screen into new buffer, then transfer.

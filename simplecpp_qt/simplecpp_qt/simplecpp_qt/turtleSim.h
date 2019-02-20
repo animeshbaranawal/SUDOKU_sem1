@@ -18,7 +18,6 @@ namespace simplecpp{
   double arctangent(double x);
   double arctangent2(double y, double x);
 
-
   void left(double dist);
   void right(double dist);
   void forward(double dist);

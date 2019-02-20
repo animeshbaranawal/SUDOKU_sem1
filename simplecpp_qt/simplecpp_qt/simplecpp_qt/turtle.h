@@ -1,21 +1,14 @@
 #ifndef _TURTLE_INCLUDED_
 #define _TURTLE_INCLUDED_
 
-#include <common_def.h>
-#include <sprite.h>
-#include <vector>
-
-using namespace std;
+#include "polygon.h"
 
 namespace simplecpp{
-class Turtle : public Polygon{
+	class Turtle : public Polygon{
 
-public:
-  Turtle(Composite* owner=NULL);
-};
+	public:
+		Turtle(Composite* owner=NULL);
+	};
 }
 
 #endif
-
-
-
