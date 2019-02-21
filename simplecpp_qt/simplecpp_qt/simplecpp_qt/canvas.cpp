@@ -127,6 +127,7 @@ namespace simplecpp{
 
 	std::multiset<Sprite*, LtSprite> spriteSet;
 	bool globalRepaintFlag;
+	QPixmap imprintedBackground;
 
 	QTCanvas::QTCanvas(QWidget* parent)
 	{
@@ -188,6 +189,7 @@ namespace simplecpp{
 		currentCanvas->setWindowTitle(QString::fromStdString(window_title));
 
 		globalRepaintFlag = true;
+		imprintedBackground = currentCanvas->getCanvasPrint();
 
 		return 0;
 	}
